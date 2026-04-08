@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTKOM & USD/TRY Tracker</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e1e4e8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .cards {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      min-width: 280px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover { border-color: #58a6ff; }
+
+    .card-label {
+      font-size: 0.85rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-ticker {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #58a6ff;
+      margin-bottom: 1rem;
+    }
+
+    .card-price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      min-height: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-change {
+      font-size: 1rem;
+      font-weight: 600;
+      min-height: 1.5rem;
+    }
+
+    .card-updated {
+      font-size: 0.75rem;
+      color: #484f58;
+      margin-top: 0.75rem;
+    }
+
+    .positive { color: #3fb950; }
+    .negative { color: #f85149; }
+
+    .loading {
+      color: #484f58;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      text-align: center;
+      color: #484f58;
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+
+    .footer .update-time { color: #8b949e; }
+
+    .error { color: #f85149; font-size: 0.9rem; }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid #30363d;
+      color: #8b949e;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover {
+      border-color: #58a6ff;
+      color: #58a6ff;
+    }
+
+    @media (max-width: 600px) {
+      .cards { flex-direction: column; align-items: center; }
+      .card { width: 100%; max-width: 320px; }
+      .card-price { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Market Watch</h1>
+
+  <div class="cards">
+    <!-- TTKOM card: data comes from data/ttkom.json (updated by GitHub Actions) -->
+    <div class="card" id="stock-card">
+      <div class="card-label">Borsa Istanbul</div>
+      <div class="card-ticker">TTKOM</div>
+      <div class="card-price loading" id="stock-price">--</div>
+      <div class="card-change" id="stock-change"></div>
+      <div class="card-updated" id="stock-updated"></div>
+    </div>
+
+    <!-- USD/TRY card: data comes live from open.er-api.com (CORS-friendly) -->
+    <div class="card" id="fx-card">
+      <div class="card-label">Exchange Rate</div>
+      <div class="card-ticker">USD / TRY</div>
+      <div class="card-price loading" id="fx-rate">--</div>
+      <div class="card-change" id="fx-change"></div>
+      <div class="card-updated" id="fx-updated"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>TTKOM updates every 15 min during market hours via GitHub Actions</div>
+    <div>USD/TRY fetched live from <a href="https://open.er-api.com" style="color:#58a6ff;">open.er-api.com</a></div>
+    <button class="refresh-btn" onclick="fetchAll()">Refresh USD/TRY</button>
+  </div>
+
+  <script>
+    // ── TTKOM: read from local JSON file (updated by GitHub Actions) ──
+    async function fetchStock() {
+      const el = document.getElementById('stock-price');
+      const changeEl = document.getElementById('stock-change');
+      const updatedEl = document.getElementById('stock-updated');
+      try {
+        const res = await fetch('data/ttkom.json');
+        if (!res.ok) throw new Error('No data file yet');
+        const data = await res.json();
+
+        const price = data.price;
+        const prevClose = data.previousClose;
+        const change = price - prevClose;
+        const changePct = (change / prevClose) * 100;
+
+        el.classList.remove('loading');
+        el.textContent = price.toFixed(2) + ' TRY';
+
+        const sign = change >= 0 ? '+' : '';
+        changeEl.className = 'card-change ' + (change >= 0 ? 'positive' : 'negative');
+        changeEl.textContent = sign + change.toFixed(2) + ' (' + sign + changePct.toFixed(2) + '%)';
+
+        if (data.updatedAt) {
+          const d = new Date(data.updatedAt);
+          updatedEl.textContent = 'Data from: ' + d.toLocaleString();
+        }
+      } catch (e) {
+        el.classList.remove('loading');
+        el.innerHTML = '<span class="error">No data yet</span>';
+        changeEl.textContent = '';
+        updatedEl.textContent = 'Push to GitHub & run the Action to populate data';
+        console.error('Stock fetch error:', e);
+      }
+    }
+
+    // ── USD/TRY: fetch live (this API supports CORS) ──
+    async function fetchFX() {
+      const el = document.getElementById('fx-rate');
+      const changeEl = document.getElementById('fx-change');
+      const updatedEl = document.getElementById('fx-updated');
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        const rate = data.rates.TRY;
+
+        el.classList.remove('loading');
+        el.textContent = rate.toFixed(4);
+
+        // This free API doesn't provide previous-day change, so we skip it
+        changeEl.className = 'card-change';
+        changeEl.textContent = '1 USD = ' + rate.toFixed(2) + ' TRY';
+
+        const d = new Date(data.time_last_update_utc);
+        updatedEl.textContent = 'Rate as of: ' + d.toLocaleDateString();
+      } catch (e) {
+        el.classList.remove('loading');
+        el.innerHTML = '<span class="error">Failed to load</span>';
+        changeEl.textContent = '';
+        console.error('FX fetch error:', e);
+      }
+    }
+
+    function fetchAll() {
+      // Reset FX card
+      document.getElementById('fx-rate').className = 'card-price loading';
+      document.getElementById('fx-rate').textContent = '--';
+      document.getElementById('fx-change').textContent = '';
+
+      fetchStock();
+      fetchFX();
+    }
+
+    // Initial fetch
+    fetchAll();
+  </script>
+
+</body>
+</html>
