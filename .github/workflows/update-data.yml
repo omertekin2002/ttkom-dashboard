@@ -1,27 +1,30 @@
-name: Update Stock Data
+name: Update Stock Data & Deploy
 
 on:
   schedule:
     # BIST market hours: 10:00–18:00 TRT (UTC+3) = 07:00–15:00 UTC
     # Runs every 15 minutes during market hours, Mon–Fri
     - cron: '*/15 7-15 * * 1-5'
+  push:
+    branches: [main]
   workflow_dispatch: # allows manual trigger from GitHub UI
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
-  update:
+  update-data:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Fetch TTKOM data from Yahoo Finance
         run: |
-          # Fetch chart data (server-side, no CORS issues)
           RAW=$(curl -s -A "Mozilla/5.0" \
             "https://query2.finance.yahoo.com/v8/finance/chart/TTKOM.IS?interval=1d&range=5d")
 
-          # Parse with python and write clean JSON
           echo "$RAW" | python3 -c "
           import sys, json
           from datetime import datetime, timezone
@@ -52,6 +55,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/ttkom.json
-          # Only commit if data actually changed
           git diff --staged --quiet || git commit -m "Update TTKOM data"
           git push
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: update-data
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
