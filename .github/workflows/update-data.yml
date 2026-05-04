@@ -30,6 +30,9 @@ jobs:
           stocks = {
               'ttkom': {'symbol': 'TTKOM', 'quote': 'TTKOM.IS'},
               'tursg': {'symbol': 'TURSG', 'quote': 'TURSG.IS'},
+              'vakbn': {'symbol': 'VAKBN', 'quote': 'VAKBN.IS'},
+              'halkb': {'symbol': 'HALKB', 'quote': 'HALKB.IS'},
+              'tcell': {'symbol': 'TCELL', 'quote': 'TCELL.IS'},
           }
 
           def chart_meta(quote):
@@ -75,7 +78,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ttkom.json data/tursg.json
+          git add data/ttkom.json data/tursg.json data/vakbn.json data/halkb.json data/tcell.json
           git diff --staged --quiet || git commit -m "Update BIST stock data"
           git push
 

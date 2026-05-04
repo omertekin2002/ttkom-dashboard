@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TTKOM / TURSG / USD/TRY</title>
+  <title>TTKOM / TURSG / VAKBN / HALKB / TCELL / USD/TRY</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -50,7 +50,7 @@
       font-size: 2rem;
       font-weight: 700;
       color: #e8e8e8;
-      letter-spacing: -0.02em;
+      letter-spacing: 0;
     }
 
     .price-usd {
@@ -110,7 +110,7 @@
 <body>
 
   <div class="container">
-    <h1>ttkom / tursg / usdtry</h1>
+    <h1>ttkom / tursg / vakbn / halkb / tcell / usdtry</h1>
 
     <div class="section" data-stock="ttkom">
       <div class="ticker">TTKOM.IS &mdash; Borsa Istanbul</div>
@@ -126,6 +126,42 @@
 
     <div class="section" data-stock="tursg">
       <div class="ticker">TURSG.IS &mdash; Borsa Istanbul</div>
+      <div class="price-row">
+        <span class="price loading" data-role="price">---</span>
+        <span class="price-usd" data-role="usd"></span>
+      </div>
+      <div class="change" data-role="change"></div>
+      <div class="meta" data-role="updated"></div>
+    </div>
+
+    <hr class="sep">
+
+    <div class="section" data-stock="vakbn">
+      <div class="ticker">VAKBN.IS &mdash; Borsa Istanbul</div>
+      <div class="price-row">
+        <span class="price loading" data-role="price">---</span>
+        <span class="price-usd" data-role="usd"></span>
+      </div>
+      <div class="change" data-role="change"></div>
+      <div class="meta" data-role="updated"></div>
+    </div>
+
+    <hr class="sep">
+
+    <div class="section" data-stock="halkb">
+      <div class="ticker">HALKB.IS &mdash; Borsa Istanbul</div>
+      <div class="price-row">
+        <span class="price loading" data-role="price">---</span>
+        <span class="price-usd" data-role="usd"></span>
+      </div>
+      <div class="change" data-role="change"></div>
+      <div class="meta" data-role="updated"></div>
+    </div>
+
+    <hr class="sep">
+
+    <div class="section" data-stock="tcell">
+      <div class="ticker">TCELL.IS &mdash; Borsa Istanbul</div>
       <div class="price-row">
         <span class="price loading" data-role="price">---</span>
         <span class="price-usd" data-role="usd"></span>
@@ -155,6 +191,9 @@
     const stocks = [
       { key: 'ttkom', file: 'data/ttkom.json', priceTRY: null },
       { key: 'tursg', file: 'data/tursg.json', priceTRY: null },
+      { key: 'vakbn', file: 'data/vakbn.json', priceTRY: null },
+      { key: 'halkb', file: 'data/halkb.json', priceTRY: null },
+      { key: 'tcell', file: 'data/tcell.json', priceTRY: null },
     ];
 
     let usdTryRate = null;
