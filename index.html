@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TTKOM & USD/TRY</title>
+  <title>TTKOM / TURSG / USD/TRY</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -110,16 +110,28 @@
 <body>
 
   <div class="container">
-    <h1>ttkom / usdtry</h1>
+    <h1>ttkom / tursg / usdtry</h1>
 
-    <div class="section">
+    <div class="section" data-stock="ttkom">
       <div class="ticker">TTKOM.IS &mdash; Borsa Istanbul</div>
       <div class="price-row">
-        <span class="price loading" id="stock-price">---</span>
-        <span class="price-usd" id="stock-price-usd"></span>
+        <span class="price loading" data-role="price">---</span>
+        <span class="price-usd" data-role="usd"></span>
       </div>
-      <div class="change" id="stock-change"></div>
-      <div class="meta" id="stock-updated"></div>
+      <div class="change" data-role="change"></div>
+      <div class="meta" data-role="updated"></div>
+    </div>
+
+    <hr class="sep">
+
+    <div class="section" data-stock="tursg">
+      <div class="ticker">TURSG.IS &mdash; Borsa Istanbul</div>
+      <div class="price-row">
+        <span class="price loading" data-role="price">---</span>
+        <span class="price-usd" data-role="usd"></span>
+      </div>
+      <div class="change" data-role="change"></div>
+      <div class="meta" data-role="updated"></div>
     </div>
 
     <hr class="sep">
@@ -134,29 +146,56 @@
     </div>
 
     <footer>
-      ttkom via github actions (every 15m, market hours) · fx via <a href="https://open.er-api.com">open.er-api.com</a><br>
-      <button onclick="fetchAll()">refresh fx</button>
+      bist equities via github actions (every 15m, market hours) · fx via <a href="https://open.er-api.com">open.er-api.com</a><br>
+      <button onclick="fetchAll()">refresh</button>
     </footer>
   </div>
 
   <script>
-    let ttkomPriceTRY = null;
+    const stocks = [
+      { key: 'ttkom', file: 'data/ttkom.json', priceTRY: null },
+      { key: 'tursg', file: 'data/tursg.json', priceTRY: null },
+    ];
+
     let usdTryRate = null;
 
-    function updateUsdPrice() {
-      const el = document.getElementById('stock-price-usd');
-      if (ttkomPriceTRY !== null && usdTryRate !== null) {
-        el.textContent = '$' + (ttkomPriceTRY / usdTryRate).toFixed(2);
-      }
+    function getStockElements(stock) {
+      const root = document.querySelector('[data-stock="' + stock.key + '"]');
+      return {
+        root,
+        priceEl: root.querySelector('[data-role="price"]'),
+        usdEl: root.querySelector('[data-role="usd"]'),
+        changeEl: root.querySelector('[data-role="change"]'),
+        metaEl: root.querySelector('[data-role="updated"]'),
+      };
     }
 
-    async function fetchStock() {
-      const el = document.getElementById('stock-price');
-      const usdEl = document.getElementById('stock-price-usd');
-      const changeEl = document.getElementById('stock-change');
-      const metaEl = document.getElementById('stock-updated');
+    function updateUsdPrices() {
+      stocks.forEach((stock) => {
+        const { usdEl } = getStockElements(stock);
+        if (stock.priceTRY !== null && usdTryRate !== null) {
+          usdEl.textContent = '$' + (stock.priceTRY / usdTryRate).toFixed(2);
+        } else {
+          usdEl.textContent = '';
+        }
+      });
+    }
+
+    function resetStock(stock) {
+      const { priceEl, usdEl, changeEl, metaEl } = getStockElements(stock);
+
+      stock.priceTRY = null;
+      priceEl.className = 'price loading';
+      priceEl.textContent = '---';
+      usdEl.textContent = '';
+      changeEl.textContent = '';
+      metaEl.textContent = '';
+    }
+
+    async function fetchStock(stock) {
+      const { priceEl, usdEl, changeEl, metaEl } = getStockElements(stock);
       try {
-        const res = await fetch('data/ttkom.json');
+        const res = await fetch(stock.file);
         if (!res.ok) throw new Error('No data file');
         const d = await res.json();
 
@@ -165,11 +204,11 @@
         const sign = change >= 0 ? '+' : '';
         const dir = change >= 0 ? 'up' : 'down';
 
-        el.className = 'price';
-        el.textContent = d.price.toFixed(2);
+        priceEl.className = 'price';
+        priceEl.textContent = d.price.toFixed(2);
 
-        ttkomPriceTRY = d.price;
-        updateUsdPrice();
+        stock.priceTRY = d.price;
+        updateUsdPrices();
 
         changeEl.className = 'change ' + dir;
         changeEl.textContent = sign + change.toFixed(2) + ' (' + sign + pct.toFixed(2) + '%)';
@@ -178,8 +217,9 @@
           metaEl.textContent = new Date(d.updatedAt).toLocaleString();
         }
       } catch (e) {
-        el.className = 'price';
-        el.innerHTML = '<span class="error">no data</span>';
+        stock.priceTRY = null;
+        priceEl.className = 'price error';
+        priceEl.textContent = 'no data';
         usdEl.textContent = '';
         changeEl.textContent = '';
         metaEl.textContent = 'push to github & run the action';
@@ -199,7 +239,7 @@
         el.textContent = rate.toFixed(4);
 
         usdTryRate = rate;
-        updateUsdPrice();
+        updateUsdPrices();
 
         changeEl.className = 'change';
         changeEl.textContent = '1 USD = ' + rate.toFixed(2) + ' TRY';
@@ -213,13 +253,15 @@
     }
 
     function fetchAll() {
-      ttkomPriceTRY = null;
       usdTryRate = null;
+      stocks.forEach(resetStock);
+
       document.getElementById('fx-rate').className = 'price loading';
       document.getElementById('fx-rate').textContent = '---';
       document.getElementById('fx-change').textContent = '';
-      document.getElementById('stock-price-usd').textContent = '';
-      fetchStock();
+      document.getElementById('fx-updated').textContent = '';
+
+      stocks.forEach(fetchStock);
       fetchFX();
     }
 

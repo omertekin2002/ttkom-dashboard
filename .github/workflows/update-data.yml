@@ -20,42 +20,63 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch TTKOM data from Yahoo Finance
+      - name: Fetch BIST stock data from Yahoo Finance
         run: |
-          RAW=$(curl -s -A "Mozilla/5.0" \
-            "https://query2.finance.yahoo.com/v8/finance/chart/TTKOM.IS?interval=1d&range=5d")
-
-          echo "$RAW" | python3 -c "
-          import sys, json
+          python3 <<'PY'
+          import json
+          import urllib.request
           from datetime import datetime, timezone
 
-          raw = json.load(sys.stdin)
-          meta = raw['chart']['result'][0]['meta']
-
-          out = {
-              'symbol': 'TTKOM',
-              'exchange': 'BIST',
-              'currency': meta['currency'],
-              'price': round(meta['regularMarketPrice'], 2),
-              'previousClose': round(meta['chartPreviousClose'], 2),
-              'dayHigh': round(meta['regularMarketDayHigh'], 2),
-              'dayLow': round(meta['regularMarketDayLow'], 2),
-              'volume': meta['regularMarketVolume'],
-              'updatedAt': datetime.now(timezone.utc).isoformat(),
-              'marketTime': meta['regularMarketTime'],
+          stocks = {
+              'ttkom': {'symbol': 'TTKOM', 'quote': 'TTKOM.IS'},
+              'tursg': {'symbol': 'TURSG', 'quote': 'TURSG.IS'},
           }
 
-          with open('data/ttkom.json', 'w') as f:
-              json.dump(out, f, indent=2)
+          def chart_meta(quote):
+              url = f'https://query2.finance.yahoo.com/v8/finance/chart/{quote}?interval=1d&range=5d'
+              req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  raw = json.load(response)
 
-          print(f\"TTKOM: {out['price']} TRY (prev close: {out['previousClose']})\")"
+              result = raw.get('chart', {}).get('result')
+              if not result:
+                  raise RuntimeError(f'No Yahoo Finance chart result for {quote}')
+
+              return result[0]['meta']
+
+          def rounded(meta, key):
+              value = meta.get(key)
+              return round(value, 2) if value is not None else None
+
+          for file_key, stock in stocks.items():
+              meta = chart_meta(stock['quote'])
+              previous_close = meta.get('chartPreviousClose') or meta.get('previousClose')
+
+              out = {
+                  'symbol': stock['symbol'],
+                  'exchange': 'BIST',
+                  'currency': meta['currency'],
+                  'price': round(meta['regularMarketPrice'], 2),
+                  'previousClose': round(previous_close, 2),
+                  'dayHigh': rounded(meta, 'regularMarketDayHigh'),
+                  'dayLow': rounded(meta, 'regularMarketDayLow'),
+                  'volume': meta.get('regularMarketVolume'),
+                  'updatedAt': datetime.now(timezone.utc).isoformat(),
+                  'marketTime': meta.get('regularMarketTime'),
+              }
+
+              with open(f'data/{file_key}.json', 'w') as f:
+                  json.dump(out, f, indent=2)
+
+              print(f"{stock['symbol']}: {out['price']} TRY (prev close: {out['previousClose']})")
+          PY
 
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ttkom.json
-          git diff --staged --quiet || git commit -m "Update TTKOM data"
+          git add data/ttkom.json data/tursg.json
+          git diff --staged --quiet || git commit -m "Update BIST stock data"
           git push
 
       - name: Upload Pages artifact
