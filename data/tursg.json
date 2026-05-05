@@ -2,11 +2,11 @@
   "symbol": "TURSG",
   "exchange": "BIST",
   "currency": "TRY",
-  "price": 14.05,
+  "price": 14.03,
   "previousClose": 13.68,
   "dayHigh": 14.25,
-  "dayLow": 14.03,
-  "volume": 8740745,
-  "updatedAt": "2026-05-05T09:12:04.782858+00:00",
-  "marketTime": 1777971418
+  "dayLow": 14.0,
+  "volume": 10791118,
+  "updatedAt": "2026-05-05T10:56:05.732302+00:00",
+  "marketTime": 1777977641
 }
