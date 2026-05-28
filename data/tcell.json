@@ -3,10 +3,10 @@
   "exchange": "BIST",
   "currency": "TRY",
   "price": 101.0,
-  "previousClose": 106.0,
+  "previousClose": 106.5,
   "dayHigh": 106.9,
   "dayLow": 101.0,
   "volume": 20062194,
-  "updatedAt": "2026-05-27T17:45:13.720506+00:00",
+  "updatedAt": "2026-05-28T10:59:42.217410+00:00",
   "marketTime": 1779788391
 }
