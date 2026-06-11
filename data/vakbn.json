@@ -2,11 +2,11 @@
   "symbol": "VAKBN",
   "exchange": "BIST",
   "currency": "TRY",
-  "price": 31.58,
-  "previousClose": 32.7,
-  "dayHigh": 32.72,
-  "dayLow": 31.4,
-  "volume": 30368126,
-  "updatedAt": "2026-06-10T17:42:54.854602+00:00",
-  "marketTime": 1781104134
+  "price": 32.02,
+  "previousClose": 31.76,
+  "dayHigh": 32.4,
+  "dayLow": 31.88,
+  "volume": 21440735,
+  "updatedAt": "2026-06-11T11:25:57.738280+00:00",
+  "marketTime": 1781176254
 }
