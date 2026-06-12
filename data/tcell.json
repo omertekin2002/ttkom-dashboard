@@ -2,11 +2,11 @@
   "symbol": "TCELL",
   "exchange": "BIST",
   "currency": "TRY",
-  "price": 109.4,
+  "price": 110.7,
   "previousClose": 107.4,
   "dayHigh": 111.4,
   "dayLow": 107.7,
-  "volume": 22097140,
-  "updatedAt": "2026-06-12T14:16:10.752494+00:00",
-  "marketTime": 1781272866
+  "volume": 26346795,
+  "updatedAt": "2026-06-12T17:23:37.804425+00:00",
+  "marketTime": 1781276994
 }
