@@ -2,11 +2,11 @@
   "symbol": "HALKB",
   "exchange": "BIST",
   "currency": "TRY",
-  "price": 37.54,
+  "price": 37.36,
   "previousClose": 39.2,
   "dayHigh": 37.84,
-  "dayLow": 37.52,
-  "volume": 18870932,
-  "updatedAt": "2026-07-21T11:29:41.093473+00:00",
-  "marketTime": 1784632478
+  "dayLow": 37.32,
+  "volume": 27335098,
+  "updatedAt": "2026-07-21T13:01:16.265086+00:00",
+  "marketTime": 1784637964
 }
