@@ -2,11 +2,11 @@
   "symbol": "TTKOM",
   "exchange": "BIST",
   "currency": "TRY",
-  "price": 52.85,
+  "price": 52.75,
   "previousClose": 58.6,
   "dayHigh": 54.9,
-  "dayLow": 52.8,
-  "volume": 23533319,
-  "updatedAt": "2026-07-27T13:41:32.077489+00:00",
-  "marketTime": 1785158786
+  "dayLow": 52.5,
+  "volume": 32217137,
+  "updatedAt": "2026-07-27T16:03:18.934369+00:00",
+  "marketTime": 1785164998
 }
