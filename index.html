@@ -3,190 +3,416 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TTKOM / TURSG / VAKBN / HALKB / TCELL / USD/TRY</title>
+  <meta name="description" content="A compact market board for five Borsa Istanbul equities and the USD/TRY exchange rate.">
+  <title>Market Board | BIST equities &amp; USD/TRY</title>
   <link rel="icon" href="favicon.ico?v=1" sizes="any">
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=1">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --ink: #000000;
+      --paper: #ffffff;
+      --red: #e91d2a;
+      --yellow: #fcc20f;
+      --link: #0000ee;
+      --olive: #8e8a25;
+      --sage: #b3bd95;
+      --salmon: #d77a7a;
+      --peach: #e6915d;
+      --lime: #c0d4a7;
+      --sky: #9ab6c8;
+      --steel: #a5b8c0;
+      --periwinkle: #8c9ae0;
+    }
 
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-      background: #1a1a1a;
-      color: #ccc;
-      min-height: 100vh;
-      padding: 3rem 1.5rem;
+      margin: 0;
+      padding: 28px 12px 48px;
+      background: var(--paper);
+      color: var(--ink);
+      font: 14px/1.4 'Times New Roman', Times, serif;
     }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: var(--link); text-decoration: underline; }
+    a:hover { text-decoration-thickness: 2px; }
+    :focus-visible { outline: 3px solid var(--link); outline-offset: 3px; }
+    .skip-link {
+      position: absolute;
+      left: 16px;
+      top: -80px;
+      z-index: 3;
+      padding: 8px 12px;
+      background: var(--yellow);
+      color: var(--ink);
+      font: 700 12px Helvetica, Arial, sans-serif;
+    }
+    .skip-link:focus { top: 12px; }
 
-    .container {
-      max-width: 540px;
+    .page-frame {
+      width: min(100%, 820px);
       margin: 0 auto;
+      border: 8px solid var(--ink);
+      background: var(--paper);
     }
-
-    h1 {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: #555;
-      margin-bottom: 2.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #2a2a2a;
+    .masthead {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 98px;
+      padding: 10px 20px 12px;
+      background: var(--ink);
+      color: var(--paper);
     }
-
-    .section {
-      margin-bottom: 2.5rem;
+    .masthead-copy { align-self: end; }
+    .masthead-subtitle,
+    .masthead-callout,
+    .sticker,
+    .top-nav,
+    .side-label,
+    .side-links,
+    .ribbon-title,
+    .price,
+    .price-unit,
+    .change,
+    .quote-label,
+    .mini-label,
+    .refresh-button,
+    .footer-nav {
+      font-family: Helvetica, Arial, sans-serif;
     }
-
-    .ticker {
-      font-size: 0.75rem;
-      color: #666;
-      margin-bottom: 0.3rem;
+    .masthead h1 {
+      margin: 0;
+      font: 900 36px/1 'Arial Black', Helvetica, Arial, sans-serif;
+      text-transform: uppercase;
     }
+    .masthead-subtitle {
+      margin: 6px 0 0;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .masthead-aside {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex: none;
+      text-align: right;
+    }
+    .sticker {
+      display: inline-block;
+      padding: 8px 11px 6px;
+      border: 1px solid var(--ink);
+      background: var(--yellow);
+      box-shadow: inset 2px 2px 0 #fff2a4, inset -2px -2px 0 #a97800, 3px 3px 0 var(--paper);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.05;
+      text-align: center;
+      text-transform: uppercase;
+      transform: rotate(4deg);
+    }
+    .sticker small { display: block; font-size: 9px; }
+    .masthead-callout {
+      color: var(--red);
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .top-nav {
+      display: flex;
+      gap: 24px;
+      padding: 8px 18px;
+      border-bottom: 1px solid var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .top-nav a { color: var(--link); }
 
-    .price-row {
+    .main-grid {
+      display: grid;
+      grid-template-columns: 204px minmax(0, 1fr);
+      gap: 22px;
+      padding: 20px;
+    }
+    .side-label {
+      margin: 0 0 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .intro-block {
+      padding: 18px 14px 20px;
+      background: var(--olive);
+      border: 1px solid var(--ink);
+    }
+    .intro-block h2,
+    .section-heading h2 {
+      margin: 0;
+      font: 900 36px/1 'Arial Black', Helvetica, Arial, sans-serif;
+      text-transform: uppercase;
+    }
+    .intro-block h2 { overflow-wrap: anywhere; }
+    .refresh-panel {
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px solid var(--ink);
+      background: var(--red);
+      color: var(--paper);
+    }
+    .refresh-panel strong {
+      display: block;
+      font: 700 16px/1.2 Helvetica, Arial, sans-serif;
+      text-transform: uppercase;
+    }
+    .refresh-panel p { margin: 8px 0 13px; }
+    .refresh-button {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .refresh-button:hover { background: var(--paper); color: var(--ink); }
+    .refresh-button:active { transform: translate(1px, 1px); }
+    .refresh-button:disabled { cursor: wait; }
+    .board-status { min-height: 17px; margin: 8px 0 0; font-size: 12px; }
+    .side-links { margin-top: 26px; font-size: 12px; }
+    .side-links ul { margin: 0; padding: 0; list-style: none; }
+    .side-links li { padding: 6px 0; border-top: 1px solid var(--ink); }
+    .side-links li:last-child { border-bottom: 1px solid var(--ink); }
+    .side-links a { font-weight: 700; }
+    .side-note { margin: 14px 0 0; font-size: 12px; }
+
+    .section-heading {
+      margin-bottom: 12px;
+      padding: 15px 16px 17px;
+      border: 1px solid var(--ink);
+      background: var(--salmon);
+    }
+    .section-heading h2 { font-size: 30px; }
+    .section-heading p:last-child { margin: 8px 0 0; }
+    .section-heading.fx-heading { margin-top: 30px; background: var(--sky); }
+
+    .ribbon-card { margin: 0 0 11px; border: 1px solid var(--ink); }
+    .ribbon-title {
       display: flex;
       align-items: baseline;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .price {
-      font-size: 2rem;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--ink);
+      background: var(--paper);
+      font-size: 14px;
       font-weight: 700;
-      color: #e8e8e8;
-      letter-spacing: 0;
+      line-height: 1.2;
+      text-transform: uppercase;
     }
-
-    .price-usd {
-      font-size: 0.95rem;
-      color: #666;
+    .ribbon-title span:last-child { font-size: 11px; white-space: nowrap; }
+    .ribbon-body { display: grid; grid-template-columns: minmax(0, 1fr) 142px; min-height: 94px; }
+    .ribbon-card:nth-of-type(1) .ribbon-body { background: var(--sage); }
+    .ribbon-card:nth-of-type(2) .ribbon-body { background: var(--peach); }
+    .ribbon-card:nth-of-type(3) .ribbon-body { background: var(--lime); }
+    .ribbon-card:nth-of-type(4) .ribbon-body { background: var(--steel); }
+    .ribbon-card:nth-of-type(5) .ribbon-body { background: var(--periwinkle); }
+    .ribbon-card.fx-card .ribbon-body { background: var(--sky); }
+    .quote-main { padding: 11px 14px 12px; }
+    .quote-label,
+    .mini-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin-top: 1px; }
+    .price { font-size: 28px; font-weight: 900; line-height: 1.08; font-variant-numeric: tabular-nums; }
+    .price-unit { font-size: 11px; font-weight: 700; }
+    .price-usd { margin-left: 6px; font-size: 13px; }
+    .change { margin-top: 4px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .change.up::before { content: '▲ '; }
+    .change.down::before { content: '▼ '; }
+    .quote-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 12px;
+      border-left: 1px solid var(--ink);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
     }
-
-    .change {
-      font-size: 0.85rem;
-      margin-top: 0.2rem;
-    }
-
-    .up { color: #4a9; }
-    .down { color: #c66; }
-
+    .quote-details > div { display: flex; justify-content: space-between; gap: 5px; }
     .meta {
-      font-size: 0.7rem;
-      color: #444;
-      margin-top: 0.4rem;
+      padding: 4px 12px 5px;
+      border-top: 1px solid var(--ink);
+      background: var(--paper);
+      font-size: 11px;
     }
-
-    .loading { color: #333; }
-
-    .sep {
-      border: none;
-      border-top: 1px solid #222;
-      margin: 2rem 0;
-    }
-
-    .error { color: #a55; }
+    .loading { opacity: .65; }
+    .error { font-size: 15px; }
+    .fx-card .ribbon-title { position: relative; }
+    .fx-card .quote-details { justify-content: center; }
 
     footer {
-      font-size: 0.65rem;
-      color: #333;
-      line-height: 1.7;
-      margin-top: 3rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid #2a2a2a;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 20px 18px;
+      border-top: 1px solid var(--ink);
+      font-size: 12px;
     }
+    footer p { margin: 0; max-width: 520px; }
+    .footer-nav { flex: none; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 
-    footer a { color: #555; }
-
-    footer button {
-      background: none;
-      border: none;
-      color: #555;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.65rem;
-      text-decoration: underline;
-      padding: 0;
+    @media (max-width: 700px) {
+      body { padding: 8px 6px 20px; }
+      .page-frame { border-width: 4px; }
+      .main-grid { grid-template-columns: 1fr; gap: 20px; padding: 12px; }
+      .sidebar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+      .refresh-panel { margin-top: 0; }
+      .side-links, .side-note { display: none; }
     }
-
-    footer button:hover { color: #999; }
+    @media (max-width: 480px) {
+      .page-frame { border-width: 2px; }
+      .masthead { min-height: 0; padding: 12px; gap: 8px; }
+      .masthead h1 { font-size: 24px; }
+      .masthead-subtitle { font-size: 10px; }
+      .masthead-callout { font-size: 11px; }
+      .sticker { padding: 5px 7px; font-size: 10px; }
+      .top-nav { gap: 16px; overflow-x: auto; white-space: nowrap; }
+      .sidebar { grid-template-columns: 1fr; }
+      .intro-block { padding: 13px; }
+      .intro-block h2 { font-size: 28px; }
+      .refresh-panel { padding: 12px; }
+      .section-heading h2 { font-size: 25px; }
+      .ribbon-body { grid-template-columns: minmax(0, 1fr) 116px; }
+      .quote-main { padding: 10px; }
+      .quote-details { padding: 8px; font-size: 11px; }
+      .price { font-size: 24px; }
+      .price-usd { display: block; width: 100%; margin-left: 0; }
+      footer { padding: 12px; flex-direction: column; }
+    }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <h1>ttkom / tursg / vakbn / halkb / tcell / usdtry</h1>
-
-    <div class="section" data-stock="ttkom">
-      <div class="ticker">TTKOM.IS &mdash; Borsa Istanbul</div>
-      <div class="price-row">
-        <span class="price loading" data-role="price">---</span>
-        <span class="price-usd" data-role="usd"></span>
+  <a class="skip-link" href="#main">Skip to market data</a>
+  <div class="page-frame">
+    <header class="masthead" id="top">
+      <div class="masthead-copy">
+        <h1>Market Board</h1>
+        <p class="masthead-subtitle">Equity quotes &amp; currency rates</p>
       </div>
-      <div class="change" data-role="change"></div>
-      <div class="meta" data-role="updated"></div>
-    </div>
-
-    <hr class="sep">
-
-    <div class="section" data-stock="tursg">
-      <div class="ticker">TURSG.IS &mdash; Borsa Istanbul</div>
-      <div class="price-row">
-        <span class="price loading" data-role="price">---</span>
-        <span class="price-usd" data-role="usd"></span>
+      <div class="masthead-aside">
+        <div class="sticker">Price watch<small>5 stocks + 1 rate</small></div>
+        <div class="masthead-callout">BIST / ISTANBUL</div>
       </div>
-      <div class="change" data-role="change"></div>
-      <div class="meta" data-role="updated"></div>
-    </div>
+    </header>
 
-    <hr class="sep">
+    <nav class="top-nav" aria-label="Page navigation">
+      <a href="#equities">Equities</a>
+      <a href="#currency">USD / TRY</a>
+      <a href="#sources">Data sources</a>
+    </nav>
 
-    <div class="section" data-stock="vakbn">
-      <div class="ticker">VAKBN.IS &mdash; Borsa Istanbul</div>
-      <div class="price-row">
-        <span class="price loading" data-role="price">---</span>
-        <span class="price-usd" data-role="usd"></span>
+    <main id="main" class="main-grid">
+      <aside class="sidebar" aria-label="Market board controls">
+        <div class="intro-block">
+          <p class="side-label">Your daily index</p>
+          <h2>Price<br>watch</h2>
+        </div>
+        <div class="refresh-panel">
+          <strong>Get the latest quotes.</strong>
+          <p>Equity files update every 15 minutes during market hours.</p>
+          <button class="refresh-button" id="refresh-button" type="button">Refresh board →</button>
+          <p class="board-status" id="board-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="side-links">
+          <p class="side-label">Quick index</p>
+          <ul>
+            <li><a href="#ttkom">TTKOM.IS</a></li>
+            <li><a href="#tursg">TURSG.IS</a></li>
+            <li><a href="#vakbn">VAKBN.IS</a></li>
+            <li><a href="#halkb">HALKB.IS</a></li>
+            <li><a href="#tcell">TCELL.IS</a></li>
+            <li><a href="#currency">USD / TRY</a></li>
+          </ul>
+        </div>
+        <p class="side-note">All share prices are shown in Turkish lira. U.S. dollar equivalents use the rate below.</p>
+      </aside>
+
+      <div class="board-content">
+        <section id="equities" aria-labelledby="equities-title">
+          <div class="section-heading">
+            <h2 id="equities-title">Borsa Istanbul</h2>
+            <p>Last available prices from the market desk.</p>
+          </div>
+
+          <article class="ribbon-card" id="ttkom" data-stock="ttkom" aria-label="TTKOM quote">
+            <div class="ribbon-title"><span>Türk Telekom</span><span>TTKOM.IS</span></div>
+            <div class="ribbon-body">
+              <div class="quote-main"><span class="quote-label">Last price</span><div class="price-row"><span class="price loading" data-role="price">---</span><span class="price-unit">TRY</span><span class="price-usd" data-role="usd"></span></div><div class="change" data-role="change"></div></div>
+              <div class="quote-details"><div><span class="mini-label">High</span><span data-role="high">—</span></div><div><span class="mini-label">Low</span><span data-role="low">—</span></div><div><span class="mini-label">Volume</span><span data-role="volume">—</span></div></div>
+            </div>
+            <div class="meta" data-role="updated">Loading quote...</div>
+          </article>
+
+          <article class="ribbon-card" id="tursg" data-stock="tursg" aria-label="TURSG quote">
+            <div class="ribbon-title"><span>Türkiye Sigorta</span><span>TURSG.IS</span></div>
+            <div class="ribbon-body">
+              <div class="quote-main"><span class="quote-label">Last price</span><div class="price-row"><span class="price loading" data-role="price">---</span><span class="price-unit">TRY</span><span class="price-usd" data-role="usd"></span></div><div class="change" data-role="change"></div></div>
+              <div class="quote-details"><div><span class="mini-label">High</span><span data-role="high">—</span></div><div><span class="mini-label">Low</span><span data-role="low">—</span></div><div><span class="mini-label">Volume</span><span data-role="volume">—</span></div></div>
+            </div>
+            <div class="meta" data-role="updated">Loading quote...</div>
+          </article>
+
+          <article class="ribbon-card" id="vakbn" data-stock="vakbn" aria-label="VAKBN quote">
+            <div class="ribbon-title"><span>VakıfBank</span><span>VAKBN.IS</span></div>
+            <div class="ribbon-body">
+              <div class="quote-main"><span class="quote-label">Last price</span><div class="price-row"><span class="price loading" data-role="price">---</span><span class="price-unit">TRY</span><span class="price-usd" data-role="usd"></span></div><div class="change" data-role="change"></div></div>
+              <div class="quote-details"><div><span class="mini-label">High</span><span data-role="high">—</span></div><div><span class="mini-label">Low</span><span data-role="low">—</span></div><div><span class="mini-label">Volume</span><span data-role="volume">—</span></div></div>
+            </div>
+            <div class="meta" data-role="updated">Loading quote...</div>
+          </article>
+
+          <article class="ribbon-card" id="halkb" data-stock="halkb" aria-label="HALKB quote">
+            <div class="ribbon-title"><span>Halkbank</span><span>HALKB.IS</span></div>
+            <div class="ribbon-body">
+              <div class="quote-main"><span class="quote-label">Last price</span><div class="price-row"><span class="price loading" data-role="price">---</span><span class="price-unit">TRY</span><span class="price-usd" data-role="usd"></span></div><div class="change" data-role="change"></div></div>
+              <div class="quote-details"><div><span class="mini-label">High</span><span data-role="high">—</span></div><div><span class="mini-label">Low</span><span data-role="low">—</span></div><div><span class="mini-label">Volume</span><span data-role="volume">—</span></div></div>
+            </div>
+            <div class="meta" data-role="updated">Loading quote...</div>
+          </article>
+
+          <article class="ribbon-card" id="tcell" data-stock="tcell" aria-label="TCELL quote">
+            <div class="ribbon-title"><span>Turkcell</span><span>TCELL.IS</span></div>
+            <div class="ribbon-body">
+              <div class="quote-main"><span class="quote-label">Last price</span><div class="price-row"><span class="price loading" data-role="price">---</span><span class="price-unit">TRY</span><span class="price-usd" data-role="usd"></span></div><div class="change" data-role="change"></div></div>
+              <div class="quote-details"><div><span class="mini-label">High</span><span data-role="high">—</span></div><div><span class="mini-label">Low</span><span data-role="low">—</span></div><div><span class="mini-label">Volume</span><span data-role="volume">—</span></div></div>
+            </div>
+            <div class="meta" data-role="updated">Loading quote...</div>
+          </article>
+        </section>
+
+        <section id="currency" aria-labelledby="currency-title">
+          <div class="section-heading fx-heading"><h2 id="currency-title">Dollar / lira</h2><p>Reference exchange rate for the dollar values above.</p></div>
+          <article class="ribbon-card fx-card" aria-label="USD to TRY exchange rate">
+            <div class="ribbon-title"><span>U.S. dollar</span><span>USD / TRY</span></div>
+            <div class="ribbon-body">
+              <div class="quote-main"><span class="quote-label">One U.S. dollar</span><div class="price-row"><span class="price loading" id="fx-rate">---</span><span class="price-unit">TRY</span></div><div class="change" id="fx-change"></div></div>
+              <div class="quote-details"><span class="mini-label">Exchange rate</span><span>USD → TRY</span></div>
+            </div>
+            <div class="meta" id="fx-updated">Loading exchange rate...</div>
+          </article>
+        </section>
       </div>
-      <div class="change" data-role="change"></div>
-      <div class="meta" data-role="updated"></div>
-    </div>
+    </main>
 
-    <hr class="sep">
-
-    <div class="section" data-stock="halkb">
-      <div class="ticker">HALKB.IS &mdash; Borsa Istanbul</div>
-      <div class="price-row">
-        <span class="price loading" data-role="price">---</span>
-        <span class="price-usd" data-role="usd"></span>
-      </div>
-      <div class="change" data-role="change"></div>
-      <div class="meta" data-role="updated"></div>
-    </div>
-
-    <hr class="sep">
-
-    <div class="section" data-stock="tcell">
-      <div class="ticker">TCELL.IS &mdash; Borsa Istanbul</div>
-      <div class="price-row">
-        <span class="price loading" data-role="price">---</span>
-        <span class="price-usd" data-role="usd"></span>
-      </div>
-      <div class="change" data-role="change"></div>
-      <div class="meta" data-role="updated"></div>
-    </div>
-
-    <hr class="sep">
-
-    <div class="section">
-      <div class="ticker">USD/TRY</div>
-      <div class="price-row">
-        <span class="price loading" id="fx-rate">---</span>
-      </div>
-      <div class="change" id="fx-change"></div>
-      <div class="meta" id="fx-updated"></div>
-    </div>
-
-    <footer>
-      bist equities via github actions (every 15m, market hours) · fx via <a href="https://open.er-api.com">open.er-api.com</a><br>
-      <button onclick="fetchAll()">refresh</button>
+    <footer id="sources">
+      <p>Equity data via GitHub Actions, scheduled every 15 minutes during market hours. Currency data via <a href="https://open.er-api.com">open.er-api.com</a>. Prices may be delayed.</p>
+      <a class="footer-nav" href="#top">Back to top ↑</a>
     </footer>
   </div>
 
@@ -198,73 +424,77 @@
       { key: 'halkb', file: 'data/halkb.json', priceTRY: null },
       { key: 'tcell', file: 'data/tcell.json', priceTRY: null },
     ];
-
     let usdTryRate = null;
 
     function getStockElements(stock) {
       const root = document.querySelector('[data-stock="' + stock.key + '"]');
       return {
-        root,
         priceEl: root.querySelector('[data-role="price"]'),
         usdEl: root.querySelector('[data-role="usd"]'),
         changeEl: root.querySelector('[data-role="change"]'),
         metaEl: root.querySelector('[data-role="updated"]'),
+        highEl: root.querySelector('[data-role="high"]'),
+        lowEl: root.querySelector('[data-role="low"]'),
+        volumeEl: root.querySelector('[data-role="volume"]'),
       };
     }
 
     function updateUsdPrices() {
       stocks.forEach((stock) => {
         const { usdEl } = getStockElements(stock);
-        if (stock.priceTRY !== null && usdTryRate !== null) {
-          usdEl.textContent = '$' + (stock.priceTRY / usdTryRate).toFixed(2);
-        } else {
-          usdEl.textContent = '';
-        }
+        usdEl.textContent = stock.priceTRY !== null && usdTryRate !== null
+          ? '≈ $' + (stock.priceTRY / usdTryRate).toFixed(2)
+          : '';
       });
     }
 
     function resetStock(stock) {
-      const { priceEl, usdEl, changeEl, metaEl } = getStockElements(stock);
-
+      const { priceEl, usdEl, changeEl, metaEl, highEl, lowEl, volumeEl } = getStockElements(stock);
       stock.priceTRY = null;
       priceEl.className = 'price loading';
       priceEl.textContent = '---';
       usdEl.textContent = '';
+      changeEl.className = 'change';
       changeEl.textContent = '';
-      metaEl.textContent = '';
+      metaEl.textContent = 'Loading quote...';
+      highEl.textContent = '—';
+      lowEl.textContent = '—';
+      volumeEl.textContent = '—';
     }
 
     async function fetchStock(stock) {
-      const { priceEl, usdEl, changeEl, metaEl } = getStockElements(stock);
+      const { priceEl, usdEl, changeEl, metaEl, highEl, lowEl, volumeEl } = getStockElements(stock);
       try {
-        const res = await fetch(stock.file);
+        const res = await fetch(stock.file, { cache: 'no-store' });
         if (!res.ok) throw new Error('No data file');
         const d = await res.json();
+        if (!Number.isFinite(d.price) || !Number.isFinite(d.previousClose) || d.previousClose === 0) throw new Error('Invalid quote');
 
         const change = d.price - d.previousClose;
         const pct = (change / d.previousClose) * 100;
         const sign = change >= 0 ? '+' : '';
-        const dir = change >= 0 ? 'up' : 'down';
 
         priceEl.className = 'price';
         priceEl.textContent = d.price.toFixed(2);
-
         stock.priceTRY = d.price;
         updateUsdPrices();
 
-        changeEl.className = 'change ' + dir;
-        changeEl.textContent = sign + change.toFixed(2) + ' (' + sign + pct.toFixed(2) + '%)';
-
-        if (d.updatedAt) {
-          metaEl.textContent = new Date(d.updatedAt).toLocaleString();
-        }
+        changeEl.className = 'change ' + (change >= 0 ? 'up' : 'down');
+        changeEl.textContent = sign + change.toFixed(2) + ' (' + sign + pct.toFixed(2) + '%) today';
+        highEl.textContent = Number.isFinite(d.dayHigh) ? d.dayHigh.toFixed(2) : '—';
+        lowEl.textContent = Number.isFinite(d.dayLow) ? d.dayLow.toFixed(2) : '—';
+        volumeEl.textContent = Number.isFinite(d.volume) ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(d.volume) : '—';
+        metaEl.textContent = d.updatedAt
+          ? 'Quote updated ' + new Date(d.updatedAt).toLocaleString('en-GB', { timeZone: 'Europe/Istanbul', dateStyle: 'medium', timeStyle: 'short' }) + ' Istanbul time'
+          : 'Update time unavailable';
       } catch (e) {
         stock.priceTRY = null;
         priceEl.className = 'price error';
-        priceEl.textContent = 'no data';
+        priceEl.textContent = 'unavailable';
         usdEl.textContent = '';
+        changeEl.className = 'change';
         changeEl.textContent = '';
-        metaEl.textContent = 'push to github & run the action';
+        metaEl.textContent = 'This quote could not be loaded. Try refreshing the board.';
       }
     }
 
@@ -274,41 +504,49 @@
       const metaEl = document.getElementById('fx-updated');
       try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (!res.ok) throw new Error('Exchange rate unavailable');
         const d = await res.json();
-        const rate = d.rates.TRY;
+        const rate = d.rates && d.rates.TRY;
+        if (!Number.isFinite(rate) || rate <= 0) throw new Error('Invalid exchange rate');
 
         el.className = 'price';
         el.textContent = rate.toFixed(4);
-
         usdTryRate = rate;
         updateUsdPrices();
-
-        changeEl.className = 'change';
         changeEl.textContent = '1 USD = ' + rate.toFixed(2) + ' TRY';
-
-        metaEl.textContent = new Date(d.time_last_update_utc).toLocaleDateString();
+        metaEl.textContent = d.time_last_update_utc
+          ? 'Rate updated ' + new Date(d.time_last_update_utc).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+          : 'Rate update time unavailable';
       } catch (e) {
-        el.className = 'price';
-        el.innerHTML = '<span class="error">failed</span>';
+        usdTryRate = null;
+        updateUsdPrices();
+        el.className = 'price error';
+        el.textContent = 'unavailable';
         changeEl.textContent = '';
+        metaEl.textContent = 'The exchange rate could not be loaded. Try refreshing the board.';
       }
     }
 
-    function fetchAll() {
+    async function fetchAll() {
+      const button = document.getElementById('refresh-button');
+      const status = document.getElementById('board-status');
+      button.disabled = true;
+      button.textContent = 'Refreshing...';
+      status.textContent = 'Loading market data...';
       usdTryRate = null;
       stocks.forEach(resetStock);
-
       document.getElementById('fx-rate').className = 'price loading';
       document.getElementById('fx-rate').textContent = '---';
       document.getElementById('fx-change').textContent = '';
-      document.getElementById('fx-updated').textContent = '';
-
-      stocks.forEach(fetchStock);
-      fetchFX();
+      document.getElementById('fx-updated').textContent = 'Loading exchange rate...';
+      await Promise.all([...stocks.map(fetchStock), fetchFX()]);
+      button.disabled = false;
+      button.textContent = 'Refresh board →';
+      status.textContent = 'Board checked just now.';
     }
 
+    document.getElementById('refresh-button').addEventListener('click', fetchAll);
     fetchAll();
   </script>
-
 </body>
 </html>
