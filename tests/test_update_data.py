@@ -27,14 +27,17 @@ REAL_PREVIOUS_CLOSES = {
 }
 
 # The data-file schema that index.html reads; None marks optional values.
+# Prices may be ints: Yahoo sends whole numbers as JSON integers and round()
+# keeps them that way.
+NUMBER = (int, float)
 SCHEMA = {
     'symbol': (str,),
     'exchange': (str,),
     'currency': (str,),
-    'price': (float,),
-    'previousClose': (float,),
-    'dayHigh': (float, type(None)),
-    'dayLow': (float, type(None)),
+    'price': NUMBER,
+    'previousClose': NUMBER,
+    'dayHigh': NUMBER + (type(None),),
+    'dayLow': NUMBER + (type(None),),
     'volume': (int, type(None)),
     'updatedAt': (str,),
     'marketTime': (int, type(None)),
@@ -47,6 +50,12 @@ def load(name):
 
 def real_fixture(key):
     return load(f'real_{key}_2026-10-20.json')
+
+
+def assert_matches_schema(test, data):
+    test.assertEqual(list(data), list(SCHEMA))
+    for key, types in SCHEMA.items():
+        test.assertIsInstance(data[key], types, key)
 
 
 class RealResponseTests(unittest.TestCase):
@@ -70,9 +79,7 @@ class RealResponseTests(unittest.TestCase):
 
     def test_output_matches_data_file_schema(self):
         out = update_data.build_quote(update_data.STOCKS['ttkom'], real_fixture('ttkom'), NOW)
-        self.assertEqual(list(out), list(SCHEMA))
-        for key, types in SCHEMA.items():
-            self.assertIsInstance(out[key], types, key)
+        assert_matches_schema(self, out)
         for key in ('price', 'previousClose', 'dayHigh', 'dayLow'):
             self.assertEqual(out[key], round(out[key], 2), key)
         self.assertEqual(out, {
@@ -91,10 +98,14 @@ class RealResponseTests(unittest.TestCase):
     def test_committed_data_files_use_the_same_schema(self):
         for path in sorted((REPO_ROOT / 'data').glob('*.json')):
             with self.subTest(path.name):
-                data = json.loads(path.read_text())
-                self.assertEqual(list(data), list(SCHEMA))
-                for key, types in SCHEMA.items():
-                    self.assertIsInstance(data[key], types, key)
+                assert_matches_schema(self, json.loads(path.read_text()))
+
+    def test_whole_number_prices_round_trip_through_the_schema(self):
+        chart = real_fixture('ttkom')
+        chart['chart']['result'][0]['meta'].update(
+            regularMarketPrice=51, regularMarketDayHigh=52, regularMarketDayLow=50)
+        out = update_data.build_quote(update_data.STOCKS['ttkom'], chart, NOW)
+        assert_matches_schema(self, json.loads(json.dumps(out)))
 
 
 class SessionEdgeCaseTests(unittest.TestCase):
