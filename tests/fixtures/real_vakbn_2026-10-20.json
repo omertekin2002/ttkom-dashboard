@@ -1,0 +1,42 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "TRY",
+          "symbol": "VAKBN.IS",
+          "regularMarketTime": 1792508990,
+          "gmtoffset": 10800,
+          "regularMarketPrice": 33.2,
+          "regularMarketChangePercent": 2.028,
+          "regularMarketDayHigh": 33.22,
+          "regularMarketDayLow": 32.14,
+          "regularMarketVolume": 31737884,
+          "chartPreviousClose": 34.24,
+          "range": "5d"
+        },
+        "timestamp": [
+          1791959400,
+          1792045800,
+          1792132200,
+          1792391400,
+          1792477800
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "close": [
+                34.2400016784668,
+                34.08000183105469,
+                32.86000061035156,
+                32.540000915527344,
+                33.20000076293945
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}
