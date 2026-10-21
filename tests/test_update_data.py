@@ -121,10 +121,15 @@ class SessionEdgeCaseTests(unittest.TestCase):
     def test_null_close_on_latest_bar(self):
         self.assertEqual(self.previous_close(load('synthetic_null_latest_close.json')), 50.05)
 
-    def test_null_close_on_previous_bar_falls_back_to_last_non_null(self):
+    def test_missing_previous_session_close_rejects_quote(self):
         chart = load('synthetic_null_latest_close.json')
-        chart['chart']['result'][0]['indicators']['quote'][0]['close'][2] = None
-        self.assertEqual(self.previous_close(chart), 50.9)
+        closes = chart['chart']['result'][0]['indicators']['quote'][0]['close']
+        for missing in (closes[:2] + [None, None], closes[:2], []):
+            with self.subTest(closes=missing):
+                chart['chart']['result'][0]['indicators']['quote'][0]['close'] = missing
+                with self.assertRaisesRegex(
+                        RuntimeError, 'No close for the 2026-10-19 previous session for TEST.IS'):
+                    self.previous_close(chart)
 
     def test_pre_open_compares_quote_session_against_the_one_before(self):
         self.assertEqual(self.previous_close(load('synthetic_pre_open.json')), 50.05)
@@ -135,8 +140,16 @@ class SessionEdgeCaseTests(unittest.TestCase):
         self.assertEqual(self.previous_close(chart), 50.05)
 
     def test_no_earlier_close_raises(self):
-        with self.assertRaisesRegex(RuntimeError, 'No close before the 2026-10-19 session for TEST.IS'):
+        with self.assertRaisesRegex(RuntimeError, 'No close for the 2026-10-16 previous session for TEST.IS'):
             update_data.build_quote(TEST_STOCK, load('synthetic_no_earlier_close.json'), NOW)
+
+    def test_no_earlier_session_raises(self):
+        chart = load('synthetic_no_earlier_close.json')
+        result = chart['chart']['result'][0]
+        result['timestamp'] = result['timestamp'][1:]
+        result['indicators']['quote'][0]['close'] = [50.05]
+        with self.assertRaisesRegex(RuntimeError, 'No close before the 2026-10-19 session for TEST.IS'):
+            self.previous_close(chart)
 
     def test_missing_chart_result_raises(self):
         with self.assertRaisesRegex(RuntimeError, 'No Yahoo Finance chart result for TEST.IS'):
@@ -185,6 +198,17 @@ class MainTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 self.run_main(tmp, fetch)
             self.assertFalse((Path(tmp) / 'vakbn.json').exists())
+
+    def test_missing_previous_close_preserves_existing_quote_file(self):
+        chart = real_fixture('ttkom')
+        chart['chart']['result'][0]['indicators']['quote'][0]['close'][-2] = None
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'ttkom.json'
+            original = (REPO_ROOT / 'data' / 'ttkom.json').read_text()
+            path.write_text(original)
+            with self.assertRaisesRegex(RuntimeError, 'No close for the 2026-10-19 previous session'):
+                self.run_main(tmp, lambda quote: chart)
+            self.assertEqual(path.read_text(), original)
 
     def test_default_out_dir_is_repo_data_dir(self):
         self.assertEqual(update_data.DEFAULT_OUT_DIR, REPO_ROOT / 'data')

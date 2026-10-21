@@ -40,6 +40,8 @@ def previous_session_close(result, quote):
 
     Daily bars are compared by exchange-local date, so weekends, holidays,
     the pre-open period and a null close on the latest bar are all handled.
+    A missing close on the previous session rejects the quote rather than
+    silently using an older session's close.
     chartPreviousClose is not used: with range=5d it is the close from
     before the whole window, not the previous session's.
     """
@@ -55,13 +57,17 @@ def previous_session_close(result, quote):
     closes = quotes[0].get('close') or []
 
     earlier = [
-        (ts, close)
-        for ts, close in zip(timestamps, closes)
-        if close is not None and local_date(ts, gmtoffset) < session
+        (ts, index)
+        for index, ts in enumerate(timestamps)
+        if local_date(ts, gmtoffset) < session
     ]
     if not earlier:
         raise RuntimeError(f'No close before the {session} session for {quote}')
-    return max(earlier)[1]
+    previous_timestamp, index = max(earlier)
+    if index >= len(closes) or closes[index] is None:
+        previous_session = local_date(previous_timestamp, gmtoffset)
+        raise RuntimeError(f'No close for the {previous_session} previous session for {quote}')
+    return closes[index]
 
 
 def rounded(meta, key):
