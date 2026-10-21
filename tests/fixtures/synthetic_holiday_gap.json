@@ -1,0 +1,39 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "TRY",
+          "symbol": "TEST.IS",
+          "regularMarketTime": 1793350800,
+          "gmtoffset": 10800,
+          "regularMarketPrice": 52.1,
+          "regularMarketDayHigh": 51.5,
+          "regularMarketDayLow": 49.72,
+          "regularMarketVolume": 1000000,
+          "chartPreviousClose": 49.8,
+          "range": "5d"
+        },
+        "timestamp": [
+          1792996200,
+          1793082600,
+          1793169000,
+          1793341800
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "close": [
+                50.2,
+                51.0,
+                51.6,
+                52.1
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}

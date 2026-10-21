@@ -1,0 +1,42 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "TRY",
+          "symbol": "TCELL.IS",
+          "regularMarketTime": 1792508995,
+          "gmtoffset": 10800,
+          "regularMarketPrice": 97.65,
+          "regularMarketChangePercent": 1.507,
+          "regularMarketDayHigh": 98.1,
+          "regularMarketDayLow": 95.1,
+          "regularMarketVolume": 13663801,
+          "chartPreviousClose": 98.3,
+          "range": "5d"
+        },
+        "timestamp": [
+          1791959400,
+          1792045800,
+          1792132200,
+          1792391400,
+          1792477800
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "close": [
+                98.30000305175781,
+                97.8499984741211,
+                96.80000305175781,
+                96.19999694824219,
+                97.6500015258789
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}

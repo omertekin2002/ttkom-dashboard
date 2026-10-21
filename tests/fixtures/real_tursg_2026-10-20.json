@@ -1,0 +1,42 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "TRY",
+          "symbol": "TURSG.IS",
+          "regularMarketTime": 1792508882,
+          "gmtoffset": 10800,
+          "regularMarketPrice": 4.82,
+          "regularMarketChangePercent": 2.335,
+          "regularMarketDayHigh": 4.86,
+          "regularMarketDayLow": 4.64,
+          "regularMarketVolume": 81653011,
+          "chartPreviousClose": 5.51,
+          "range": "5d"
+        },
+        "timestamp": [
+          1791959400,
+          1792045800,
+          1792132200,
+          1792391400,
+          1792477800
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "close": [
+                5.510000228881836,
+                5.400000095367432,
+                5.230000019073486,
+                4.710000038146973,
+                4.820000171661377
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}
