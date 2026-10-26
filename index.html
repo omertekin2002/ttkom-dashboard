@@ -251,6 +251,7 @@
       background: var(--paper);
       font-size: 11px;
     }
+    .meta.is-stale { background: var(--yellow); font-weight: 700; }
     .loading { opacity: .65; }
     .error { font-size: 15px; }
     .fx-card .ribbon-title { position: relative; }
@@ -325,7 +326,7 @@
         </div>
         <div class="refresh-panel">
           <strong>Get the latest quotes.</strong>
-          <p>Equity files update every 15 minutes during market hours.</p>
+          <p>Equity files are refreshed by a scheduled job a few times each trading day; GitHub may delay runs.</p>
           <button class="refresh-button" id="refresh-button" type="button">Refresh board →</button>
           <p class="board-status" id="board-status" role="status" aria-live="polite"></p>
         </div>
@@ -411,18 +412,19 @@
     </main>
 
     <footer id="sources">
-      <p>Equity data via GitHub Actions, scheduled every 15 minutes during market hours. Currency data via <a href="https://open.er-api.com">open.er-api.com</a>. Prices may be delayed.</p>
+      <p>Equity data via Yahoo Finance, refreshed by a scheduled GitHub Actions job a few times each trading day; GitHub may delay runs. Each card shows when its quote is from. Currency data via <a href="https://open.er-api.com">open.er-api.com</a>. Prices may be delayed.</p>
       <a class="footer-nav" href="#top">Back to top ↑</a>
     </footer>
   </div>
 
+  <script src="assets/freshness.js"></script>
   <script>
     const stocks = [
-      { key: 'ttkom', file: 'data/ttkom.json', priceTRY: null },
-      { key: 'tursg', file: 'data/tursg.json', priceTRY: null },
-      { key: 'vakbn', file: 'data/vakbn.json', priceTRY: null },
-      { key: 'halkb', file: 'data/halkb.json', priceTRY: null },
-      { key: 'tcell', file: 'data/tcell.json', priceTRY: null },
+      { key: 'ttkom', file: 'data/ttkom.json', priceTRY: null, stale: false },
+      { key: 'tursg', file: 'data/tursg.json', priceTRY: null, stale: false },
+      { key: 'vakbn', file: 'data/vakbn.json', priceTRY: null, stale: false },
+      { key: 'halkb', file: 'data/halkb.json', priceTRY: null, stale: false },
+      { key: 'tcell', file: 'data/tcell.json', priceTRY: null, stale: false },
     ];
     let usdTryRate = null;
 
@@ -451,11 +453,13 @@
     function resetStock(stock) {
       const { priceEl, usdEl, changeEl, metaEl, highEl, lowEl, volumeEl } = getStockElements(stock);
       stock.priceTRY = null;
+      stock.stale = false;
       priceEl.className = 'price loading';
       priceEl.textContent = '---';
       usdEl.textContent = '';
       changeEl.className = 'change';
       changeEl.textContent = '';
+      metaEl.className = 'meta';
       metaEl.textContent = 'Loading quote...';
       highEl.textContent = '—';
       lowEl.textContent = '—';
@@ -484,16 +488,19 @@
         highEl.textContent = Number.isFinite(d.dayHigh) ? d.dayHigh.toFixed(2) : '—';
         lowEl.textContent = Number.isFinite(d.dayLow) ? d.dayLow.toFixed(2) : '—';
         volumeEl.textContent = Number.isFinite(d.volume) ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(d.volume) : '—';
-        metaEl.textContent = d.updatedAt
-          ? 'Quote updated ' + new Date(d.updatedAt).toLocaleString('en-GB', { timeZone: 'Europe/Istanbul', dateStyle: 'medium', timeStyle: 'short' }) + ' Istanbul time'
-          : 'Update time unavailable';
+        const freshness = Freshness.describeQuote(d, new Date());
+        stock.stale = freshness.stale;
+        metaEl.className = 'meta' + (freshness.stale ? ' is-stale' : '');
+        metaEl.textContent = freshness.text;
       } catch (e) {
         stock.priceTRY = null;
+        stock.stale = false;
         priceEl.className = 'price error';
         priceEl.textContent = 'unavailable';
         usdEl.textContent = '';
         changeEl.className = 'change';
         changeEl.textContent = '';
+        metaEl.className = 'meta';
         metaEl.textContent = 'This quote could not be loaded. Try refreshing the board.';
       }
     }
@@ -542,7 +549,9 @@
       await Promise.all([...stocks.map(fetchStock), fetchFX()]);
       button.disabled = false;
       button.textContent = 'Refresh board →';
-      status.textContent = 'Board checked just now.';
+      status.textContent = stocks.some((stock) => stock.stale)
+        ? 'Board checked just now. Some quotes may be out of date.'
+        : 'Board checked just now.';
     }
 
     document.getElementById('refresh-button').addEventListener('click', fetchAll);
