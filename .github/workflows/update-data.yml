@@ -10,13 +10,19 @@ on:
   workflow_dispatch: # allows manual trigger from GitHub UI
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
+
+# Never run two updates at once: a scheduled and a push-triggered run would
+# race on git push. A queued run waits for the running one instead.
+concurrency:
+  group: update-data
+  cancel-in-progress: false
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -39,6 +45,9 @@ jobs:
   deploy:
     needs: update-data
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
